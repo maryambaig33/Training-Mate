@@ -21,6 +21,7 @@ const AiCoach: React.FC = () => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -29,6 +30,19 @@ const AiCoach: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading]);
+
+  // Listen for booking events from the Classes component
+  useEffect(() => {
+    const handleBookClass = (e: CustomEvent<{ message: string }>) => {
+      setQuestion(e.detail.message);
+      inputRef.current?.focus();
+    };
+
+    window.addEventListener('bookClass', handleBookClass as EventListener);
+    return () => {
+      window.removeEventListener('bookClass', handleBookClass as EventListener);
+    };
+  }, []);
 
   const handleSend = async (text: string) => {
     if (!text.trim()) return;
@@ -142,6 +156,7 @@ const AiCoach: React.FC = () => {
           <div className="p-4 bg-white border-t border-gray-100">
             <form onSubmit={handleSubmit} className="flex gap-3">
               <input
+                ref={inputRef}
                 type="text"
                 className="flex-1 px-5 py-4 rounded-full border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-mate-orange/20 focus:border-mate-orange transition shadow-inner text-gray-800 placeholder-gray-400 disabled:opacity-50 disabled:bg-gray-100"
                 placeholder="Ask about classes, prices, or vibes..."

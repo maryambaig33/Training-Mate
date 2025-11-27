@@ -16,6 +16,20 @@ const SCHEDULE: ExtendedClassSession[] = [
 ];
 
 const Classes: React.FC = () => {
+  const handleBook = (className: string, time: string) => {
+    // Dispatch a custom event that AiCoach listens for
+    const event = new CustomEvent('bookClass', { 
+      detail: { message: `I'm keen to book the ${className} class at ${time}! Is there a spot for me?` } 
+    });
+    window.dispatchEvent(event);
+    
+    // Smooth scroll to AI Coach
+    const coachSection = document.getElementById('ai-coach');
+    if (coachSection) {
+      coachSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <section id="classes" className="py-24 bg-gray-900 text-white relative overflow-hidden">
       {/* Decorative background element */}
@@ -73,9 +87,12 @@ const Classes: React.FC = () => {
                     />
                     <span className="ml-3 text-sm font-medium text-gray-300">Trainer {session.trainer}</span>
                 </div>
-                <a href="#ai-coach" className="bg-white text-mate-blue hover:bg-mate-orange hover:text-white text-xs font-bold px-4 py-2 rounded-full transition-colors uppercase tracking-wide">
+                <button 
+                  onClick={() => handleBook(session.name, session.time)}
+                  className="bg-white text-mate-blue hover:bg-mate-orange hover:text-white text-xs font-bold px-4 py-2 rounded-full transition-colors uppercase tracking-wide cursor-pointer"
+                >
                     Book
-                </a>
+                </button>
               </div>
             </div>
           ))}
