@@ -7,6 +7,11 @@ interface Message {
   text: string;
 }
 
+// Interface for the custom event detail
+interface BookClassEventDetail {
+  message: string;
+}
+
 const SUGGESTED_QUESTIONS = [
   "What's the class schedule?",
   "Is it beginner friendly?",
@@ -33,10 +38,11 @@ const AiCoach: React.FC = () => {
 
   // Listen for booking events from the Classes component
   useEffect(() => {
-    // Using explicit typing for the custom event to avoid TS strict mode issues
-    const handleBookClass = (e: any) => {
-      if (e.detail && e.detail.message) {
-        setQuestion(e.detail.message);
+    // Strictly typed event handler
+    const handleBookClass = (e: Event) => {
+      const customEvent = e as CustomEvent<BookClassEventDetail>;
+      if (customEvent.detail && customEvent.detail.message) {
+        setQuestion(customEvent.detail.message);
         inputRef.current?.focus();
       }
     };

@@ -18,6 +18,7 @@ const SCHEDULE: ExtendedClassSession[] = [
 const Classes: React.FC = () => {
   const handleBook = (className: string, time: string) => {
     // Dispatch a custom event that AiCoach listens for
+    // Detail must match BookClassEventDetail interface in AiCoach
     const event = new CustomEvent('bookClass', { 
       detail: { message: `I'm keen to book the ${className} class at ${time}! Is there a spot for me?` } 
     });
