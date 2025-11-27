@@ -2,67 +2,61 @@ import React from 'react';
 import { ClassSession } from '../types';
 
 const SCHEDULE: ClassSession[] = [
-  { id: 1, time: '06:00 AM', name: 'Mighty Mate (HIIT)', trainer: 'Jono', duration: '45 min' },
-  { id: 2, time: '07:00 AM', name: 'Bondi Burn (Cardio)', trainer: 'Sarah', duration: '45 min' },
-  { id: 3, time: '08:00 AM', name: 'Mighty Mate (HIIT)', trainer: 'Jono', duration: '45 min' },
-  { id: 4, time: '12:00 PM', name: 'Outback Abs (Core)', trainer: 'Mike', duration: '30 min' },
-  { id: 5, time: '05:30 PM', name: 'Thunder Down Under (Strength)', trainer: 'Emma', duration: '45 min' },
-  { id: 6, time: '06:30 PM', name: 'Mighty Mate (HIIT)', trainer: 'Emma', duration: '45 min' },
+  { id: 1, time: '06:00 AM', name: 'Mighty Mate', trainer: 'Jono', duration: '45 MIN' },
+  { id: 2, time: '07:00 AM', name: 'Bondi Burn', trainer: 'Sarah', duration: '45 MIN' },
+  { id: 3, time: '08:00 AM', name: 'Mighty Mate', trainer: 'Jono', duration: '45 MIN' },
+  { id: 4, time: '12:00 PM', name: 'Outback Abs', trainer: 'Mike', duration: '30 MIN' },
+  { id: 5, time: '05:30 PM', name: 'Thunder Down Under', trainer: 'Emma', duration: '45 MIN' },
+  { id: 6, time: '06:30 PM', name: 'Mighty Mate', trainer: 'Emma', duration: '45 MIN' },
 ];
 
 const Classes: React.FC = () => {
   return (
-    <section id="classes" className="py-16 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-base text-mate-orange font-semibold tracking-wide uppercase">Sweat with us</h2>
-          <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-            Today's Schedule
-          </p>
-          <p className="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">
-            Book your spot early, mate! Classes fill up faster than a cold beer on a hot day.
+    <section id="classes" className="py-24 bg-gray-900 text-white relative overflow-hidden">
+        {/* Decorative background element */}
+      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-mate-orange rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
+      <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-mate-light-blue rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center mb-16">
+          <h2 className="text-mate-orange font-bold tracking-wider uppercase text-sm mb-2">Schedule</h2>
+          <h3 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            Train Like an Aussie
+          </h3>
+          <p className="max-w-2xl text-xl text-gray-400 mx-auto">
+            High energy, good vibes, and a workout that flies by.
           </p>
         </div>
 
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          <ul className="divide-y divide-gray-200">
-            {SCHEDULE.map((session) => (
-              <li key={session.id} className="hover:bg-gray-50 transition duration-150 ease-in-out">
-                <div className="px-4 py-4 sm:px-6">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium text-mate-blue truncate">
-                      {session.name}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {SCHEDULE.map((session) => (
+            <div key={session.id} className="bg-gray-800 rounded-xl p-6 hover:bg-gray-750 border border-gray-700 hover:border-mate-orange transition-all duration-300 group">
+              <div className="flex justify-between items-start mb-4">
+                <span className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-gray-700 text-mate-orange group-hover:bg-mate-orange group-hover:text-white transition-colors">
+                  {session.duration}
+                </span>
+                <span className="text-gray-400 text-sm font-medium">{session.time}</span>
+              </div>
+              
+              <h4 className="text-2xl font-heading font-bold text-white mb-2">{session.name}</h4>
+              
+              <div className="flex items-center justify-between mt-6">
+                <div className="flex items-center">
+                    <div className="h-8 w-8 rounded-full bg-gray-600 flex items-center justify-center text-xs font-bold text-white">
+                        {session.trainer.charAt(0)}
                     </div>
-                    <div className="ml-2 flex-shrink-0 flex">
-                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                        {session.duration}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="mt-2 sm:flex sm:justify-between">
-                    <div className="sm:flex">
-                      <p className="flex items-center text-sm text-gray-500">
-                        <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                        </svg>
-                        Trainer: {session.trainer}
-                      </p>
-                    </div>
-                    <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                      <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                      </svg>
-                      {session.time}
-                    </div>
-                  </div>
+                    <span className="ml-3 text-sm text-gray-300">with {session.trainer}</span>
                 </div>
-              </li>
-            ))}
-          </ul>
+                <button className="text-sm font-bold text-mate-orange hover:text-white transition-colors uppercase tracking-wide">
+                    Book Now &rarr;
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
         
-        <div className="mt-10 text-center">
-            <button className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-mate-blue hover:bg-blue-800 transition">
+        <div className="mt-12 text-center">
+            <button className="inline-flex items-center px-8 py-3 border border-gray-600 hover:border-white text-base font-bold rounded-full text-white hover:bg-white hover:text-gray-900 transition-all uppercase tracking-wide">
                 View Full Calendar
             </button>
         </div>

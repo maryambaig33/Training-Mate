@@ -1,92 +1,122 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { askCoachMate } from '../services/geminiService';
-import { GoogleGenAI } from '@google/genai'; // Importing just for type reference if needed, though used in service
+
+interface Message {
+  id: string;
+  sender: 'user' | 'mate';
+  text: string;
+}
 
 const AiCoach: React.FC = () => {
   const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([
+    { id: 'welcome', sender: 'mate', text: "G'day legend! I'm Coach Mate. Ready to smash some goals? Ask me anything about fitness, our classes, or just for a bit of motivation!" }
+  ]);
   const [isLoading, setIsLoading] = useState(false);
-  const answerRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!question.trim()) return;
 
+    const userMsg: Message = { id: Date.now().toString(), sender: 'user', text: question };
+    setMessages(prev => [...prev, userMsg]);
+    setQuestion('');
     setIsLoading(true);
-    setAnswer(null);
 
-    const response = await askCoachMate(question);
-    
-    setAnswer(response);
-    setIsLoading(false);
+    try {
+      const responseText = await askCoachMate(question);
+      const botMsg: Message = { id: (Date.now() + 1).toString(), sender: 'mate', text: responseText };
+      setMessages(prev => [...prev, botMsg]);
+    } catch (error) {
+      const errorMsg: Message = { id: (Date.now() + 1).toString(), sender: 'mate', text: "Crikey! Had a bit of a stumble there. Try asking again, mate." };
+      setMessages(prev => [...prev, errorMsg]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  useEffect(() => {
-    if (answer && answerRef.current) {
-      answerRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  }, [answer]);
-
   return (
-    <section id="ai-coach" className="py-16 bg-white">
+    <section id="ai-coach" className="py-24 bg-blue-50">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-blue-50 rounded-2xl shadow-xl overflow-hidden border border-blue-100">
-          <div className="p-8 md:p-12">
-            <div className="flex items-center mb-6">
-              <div className="h-16 w-16 rounded-full bg-mate-orange flex items-center justify-center text-3xl mr-4 shadow-lg shrink-0 text-white">
-                🦘
-              </div>
-              <div>
-                <h2 className="text-3xl font-extrabold text-mate-blue">Ask Coach Mate</h2>
-                <p className="text-blue-600">Your 24/7 Aussie AI fitness companion.</p>
+        <div className="text-center mb-10">
+             <h2 className="text-mate-orange font-bold tracking-wider uppercase text-sm mb-2">24/7 Support</h2>
+             <h3 className="text-4xl font-heading font-bold text-mate-blue">Chat with Coach Mate</h3>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col h-[600px]">
+          
+          {/* Chat Header */}
+          <div className="bg-mate-blue p-4 flex items-center shadow-md z-10">
+            <div className="h-10 w-10 rounded-full bg-mate-orange flex items-center justify-center text-xl mr-3 border-2 border-white">
+              🦘
+            </div>
+            <div>
+              <h3 className="font-bold text-white">Coach Mate AI</h3>
+              <div className="flex items-center">
+                <span className="h-2 w-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
+                <span className="text-xs text-blue-200">Online & Ready to Motivate</span>
               </div>
             </div>
-            
-            <p className="text-gray-600 mb-8">
-              Need a quick tip on form? Wondering what to eat post-workout? Or just need a hype man? 
-              Ask me anything, legend!
-            </p>
+          </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="question" className="sr-only">Your Question</label>
-                <input
-                  type="text"
-                  id="question"
-                  className="block w-full px-4 py-4 rounded-lg border-2 border-blue-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-mate-blue focus:border-transparent text-lg"
-                  placeholder="e.g. How do I improve my squat form?"
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  disabled={isLoading}
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`w-full flex items-center justify-center px-8 py-4 border border-transparent text-lg font-medium rounded-lg text-white bg-mate-blue hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mate-blue transition-all ${
-                  isLoading ? 'opacity-75 cursor-wait' : ''
-                }`}
+          {/* Chat Area */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+            {messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`flex w-full ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {isLoading ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Thinking...
-                  </span>
-                ) : (
-                  'Ask Mate'
-                )}
-              </button>
-            </form>
-
-            {answer && (
-              <div ref={answerRef} className="mt-8 p-6 bg-white rounded-lg border-l-4 border-mate-orange shadow-sm animate-fade-in">
-                 <h4 className="text-lg font-bold text-mate-blue mb-2">Coach Mate says:</h4>
-                 <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{answer}</p>
+                <div
+                  className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm leading-relaxed shadow-sm ${
+                    msg.sender === 'user'
+                      ? 'bg-mate-blue text-white rounded-br-none'
+                      : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none'
+                  }`}
+                >
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start w-full">
+                <div className="bg-white rounded-2xl rounded-bl-none px-5 py-4 border border-gray-200 shadow-sm flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Area */}
+          <div className="p-4 bg-white border-t border-gray-100">
+            <form onSubmit={handleSubmit} className="flex gap-2">
+              <input
+                type="text"
+                className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-mate-blue focus:border-transparent transition"
+                placeholder="Ask about form, nutrition, or class schedule..."
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                disabled={isLoading}
+              />
+              <button
+                type="submit"
+                disabled={isLoading || !question.trim()}
+                className="bg-mate-orange text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mate-orange disabled:opacity-50 disabled:cursor-not-allowed transition transform active:scale-95"
+              >
+                Send
+              </button>
+            </form>
           </div>
         </div>
       </div>
