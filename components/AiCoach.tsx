@@ -7,10 +7,17 @@ interface Message {
   text: string;
 }
 
+const SUGGESTED_QUESTIONS = [
+  "What's the class schedule?",
+  "Is it beginner friendly?",
+  "Tell me a dad joke!",
+  "Do you have showers?"
+];
+
 const AiCoach: React.FC = () => {
   const [question, setQuestion] = useState('');
   const [messages, setMessages] = useState<Message[]>([
-    { id: 'welcome', sender: 'mate', text: "G'day legend! I'm Coach Mate. Ready to smash some goals? Ask me anything about fitness, our classes, or just for a bit of motivation!" }
+    { id: 'welcome', sender: 'mate', text: "G'day legend! Coach Mate here. I'm here to help you get fit and have a laugh. What's on your mind?" }
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -21,90 +28,118 @@ const AiCoach: React.FC = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, isLoading]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!question.trim()) return;
+  const handleSend = async (text: string) => {
+    if (!text.trim()) return;
 
-    const userMsg: Message = { id: Date.now().toString(), sender: 'user', text: question };
+    const userMsg: Message = { id: Date.now().toString(), sender: 'user', text: text };
     setMessages(prev => [...prev, userMsg]);
     setQuestion('');
     setIsLoading(true);
 
     try {
-      const responseText = await askCoachMate(question);
+      const responseText = await askCoachMate(text);
       const botMsg: Message = { id: (Date.now() + 1).toString(), sender: 'mate', text: responseText };
       setMessages(prev => [...prev, botMsg]);
     } catch (error) {
-      const errorMsg: Message = { id: (Date.now() + 1).toString(), sender: 'mate', text: "Crikey! Had a bit of a stumble there. Try asking again, mate." };
+      const errorMsg: Message = { id: (Date.now() + 1).toString(), sender: 'mate', text: "Crikey! Had a bit of a wobble there. Try again, mate." };
       setMessages(prev => [...prev, errorMsg]);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSend(question);
+  };
+
   return (
-    <section id="ai-coach" className="py-24 bg-blue-50">
+    <section id="ai-coach" className="py-24 bg-gradient-to-b from-blue-50 to-white">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-             <h2 className="text-mate-orange font-bold tracking-wider uppercase text-sm mb-2">24/7 Support</h2>
-             <h3 className="text-4xl font-heading font-bold text-mate-blue">Chat with Coach Mate</h3>
+             <h2 className="text-mate-orange font-bold tracking-wider uppercase text-sm mb-2">24/7 Digital Mateship</h2>
+             <h3 className="text-4xl font-heading font-bold text-mate-blue">Have a Yarn with Coach Mate</h3>
+             <p className="mt-2 text-gray-500">He's got answers, motivation, and some truly terrible jokes.</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col h-[600px]">
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col h-[650px] relative">
           
           {/* Chat Header */}
-          <div className="bg-mate-blue p-4 flex items-center shadow-md z-10">
-            <div className="h-10 w-10 rounded-full bg-mate-orange flex items-center justify-center text-xl mr-3 border-2 border-white">
-              🦘
-            </div>
-            <div>
-              <h3 className="font-bold text-white">Coach Mate AI</h3>
-              <div className="flex items-center">
-                <span className="h-2 w-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                <span className="text-xs text-blue-200">Online & Ready to Motivate</span>
-              </div>
+          <div className="bg-mate-blue p-5 flex items-center justify-between shadow-lg z-10 relative overflow-hidden">
+             {/* Abstract shape in header */}
+            <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-mate-orange rounded-full opacity-20 blur-xl"></div>
+            
+            <div className="flex items-center relative z-10">
+                <div className="relative">
+                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-mate-orange to-orange-600 flex items-center justify-center text-2xl mr-4 border-2 border-white shadow-sm">
+                    🦘
+                    </div>
+                    <div className="absolute bottom-0 right-3 h-3.5 w-3.5 bg-green-500 border-2 border-mate-blue rounded-full"></div>
+                </div>
+                <div>
+                <h3 className="font-bold text-lg text-white font-heading tracking-wide">Coach Mate</h3>
+                <p className="text-xs text-blue-200 font-medium">Always here for you</p>
+                </div>
             </div>
           </div>
 
           {/* Chat Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/50 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={`flex w-full ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-5 py-3 text-sm leading-relaxed shadow-sm ${
+                  className={`max-w-[85%] rounded-2xl px-6 py-4 text-base shadow-sm leading-relaxed relative ${
                     msg.sender === 'user'
-                      ? 'bg-mate-blue text-white rounded-br-none'
-                      : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none'
+                      ? 'bg-mate-blue text-white rounded-br-sm'
+                      : 'bg-white text-gray-800 border border-gray-100 rounded-bl-sm'
                   }`}
                 >
                   {msg.text}
+                  <div className={`absolute bottom-0 ${msg.sender === 'user' ? '-right-2' : '-left-2'} w-4 h-4 transform rotate-45 ${msg.sender === 'user' ? 'bg-mate-blue' : 'bg-white border-b border-l border-gray-100'} -z-10`}></div>
                 </div>
               </div>
             ))}
+            
             {isLoading && (
               <div className="flex justify-start w-full">
-                <div className="bg-white rounded-2xl rounded-bl-none px-5 py-4 border border-gray-200 shadow-sm flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                <div className="bg-white rounded-2xl rounded-bl-sm px-5 py-4 border border-gray-100 shadow-sm flex items-center space-x-1.5">
+                  <span className="text-xs text-gray-400 font-bold uppercase mr-2">Typing</span>
+                  <div className="w-1.5 h-1.5 bg-mate-orange rounded-full animate-bounce"></div>
+                  <div className="w-1.5 h-1.5 bg-mate-orange rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></div>
+                  <div className="w-1.5 h-1.5 bg-mate-orange rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Suggested Chips (Only show if not loading and messages < 5 to keep clean) */}
+          {!isLoading && messages.length < 5 && (
+             <div className="px-6 pb-2 bg-gray-50/50 flex flex-wrap gap-2 justify-center">
+                 {SUGGESTED_QUESTIONS.map((q) => (
+                     <button 
+                        key={q}
+                        onClick={() => handleSend(q)}
+                        className="text-xs bg-white border border-gray-200 text-gray-600 px-3 py-1.5 rounded-full hover:bg-mate-orange hover:text-white hover:border-mate-orange transition-colors shadow-sm"
+                     >
+                         {q}
+                     </button>
+                 ))}
+             </div>
+          )}
+
           {/* Input Area */}
           <div className="p-4 bg-white border-t border-gray-100">
-            <form onSubmit={handleSubmit} className="flex gap-2">
+            <form onSubmit={handleSubmit} className="flex gap-3">
               <input
                 type="text"
-                className="flex-1 px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-mate-blue focus:border-transparent transition"
-                placeholder="Ask about form, nutrition, or class schedule..."
+                className="flex-1 px-5 py-4 rounded-full border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-mate-orange/20 focus:border-mate-orange transition shadow-inner text-gray-800 placeholder-gray-400"
+                placeholder="Ask about classes, prices, or vibes..."
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 disabled={isLoading}
@@ -112,9 +147,11 @@ const AiCoach: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading || !question.trim()}
-                className="bg-mate-orange text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-mate-orange disabled:opacity-50 disabled:cursor-not-allowed transition transform active:scale-95"
+                className="bg-mate-orange text-white h-14 w-14 rounded-full flex items-center justify-center font-bold hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-100 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:rotate-12 hover:scale-105 shadow-md"
               >
-                Send
+                <svg className="w-6 h-6 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
               </button>
             </form>
           </div>
