@@ -33,14 +33,17 @@ const AiCoach: React.FC = () => {
 
   // Listen for booking events from the Classes component
   useEffect(() => {
-    const handleBookClass = (e: CustomEvent<{ message: string }>) => {
-      setQuestion(e.detail.message);
-      inputRef.current?.focus();
+    // Using explicit typing for the custom event to avoid TS strict mode issues
+    const handleBookClass = (e: any) => {
+      if (e.detail && e.detail.message) {
+        setQuestion(e.detail.message);
+        inputRef.current?.focus();
+      }
     };
 
-    window.addEventListener('bookClass', handleBookClass as EventListener);
+    window.addEventListener('bookClass', handleBookClass);
     return () => {
-      window.removeEventListener('bookClass', handleBookClass as EventListener);
+      window.removeEventListener('bookClass', handleBookClass);
     };
   }, []);
 
