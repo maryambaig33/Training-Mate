@@ -33,17 +33,20 @@ const AiCoach: React.FC = () => {
   const handleSend = async (text: string) => {
     if (!text.trim()) return;
 
-    const userMsg: Message = { id: Date.now().toString(), sender: 'user', text: text };
+    // Use a more unique ID generator to prevent potential key collisions
+    const userMsgId = `user-${Date.now()}`;
+    const userMsg: Message = { id: userMsgId, sender: 'user', text: text };
+    
     setMessages(prev => [...prev, userMsg]);
     setQuestion('');
     setIsLoading(true);
 
     try {
       const responseText = await askCoachMate(text);
-      const botMsg: Message = { id: (Date.now() + 1).toString(), sender: 'mate', text: responseText };
+      const botMsg: Message = { id: `mate-${Date.now()}`, sender: 'mate', text: responseText };
       setMessages(prev => [...prev, botMsg]);
     } catch (error) {
-      const errorMsg: Message = { id: (Date.now() + 1).toString(), sender: 'mate', text: "Crikey! Had a bit of a wobble there. Try again, mate." };
+      const errorMsg: Message = { id: `error-${Date.now()}`, sender: 'mate', text: "Crikey! Had a bit of a wobble there. Give it another burl in a sec, mate." };
       setMessages(prev => [...prev, errorMsg]);
     } finally {
       setIsLoading(false);
@@ -64,7 +67,7 @@ const AiCoach: React.FC = () => {
              <p className="mt-2 text-gray-500">He's got answers, motivation, and some truly terrible jokes.</p>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col h-[650px] relative">
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col h-[600px] relative ring-1 ring-black/5">
           
           {/* Chat Header */}
           <div className="bg-mate-blue p-5 flex items-center justify-between shadow-lg z-10 relative overflow-hidden">
@@ -72,15 +75,18 @@ const AiCoach: React.FC = () => {
             <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-mate-orange rounded-full opacity-20 blur-xl"></div>
             
             <div className="flex items-center relative z-10">
-                <div className="relative">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-mate-orange to-orange-600 flex items-center justify-center text-2xl mr-4 border-2 border-white shadow-sm">
+                <div className="relative group">
+                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-mate-orange to-orange-600 flex items-center justify-center text-2xl mr-4 border-2 border-white shadow-sm transform group-hover:scale-110 transition-transform">
                     🦘
                     </div>
-                    <div className="absolute bottom-0 right-3 h-3.5 w-3.5 bg-green-500 border-2 border-mate-blue rounded-full"></div>
+                    <div className="absolute bottom-0 right-3 h-3.5 w-3.5 bg-green-500 border-2 border-mate-blue rounded-full animate-pulse"></div>
                 </div>
                 <div>
                 <h3 className="font-bold text-lg text-white font-heading tracking-wide">Coach Mate</h3>
-                <p className="text-xs text-blue-200 font-medium">Always here for you</p>
+                <p className="text-xs text-blue-200 font-medium flex items-center">
+                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 mr-1.5"></span>
+                  Online & Ready
+                </p>
                 </div>
             </div>
           </div>
@@ -90,25 +96,24 @@ const AiCoach: React.FC = () => {
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex w-full ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex w-full ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fadeInUp`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-6 py-4 text-base shadow-sm leading-relaxed relative ${
+                  className={`max-w-[85%] rounded-2xl px-6 py-4 text-base shadow-sm leading-relaxed relative transform transition-all duration-300 ${
                     msg.sender === 'user'
                       ? 'bg-mate-blue text-white rounded-br-sm'
                       : 'bg-white text-gray-800 border border-gray-100 rounded-bl-sm'
                   }`}
                 >
                   {msg.text}
-                  <div className={`absolute bottom-0 ${msg.sender === 'user' ? '-right-2' : '-left-2'} w-4 h-4 transform rotate-45 ${msg.sender === 'user' ? 'bg-mate-blue' : 'bg-white border-b border-l border-gray-100'} -z-10`}></div>
                 </div>
               </div>
             ))}
             
             {isLoading && (
-              <div className="flex justify-start w-full">
+              <div className="flex justify-start w-full animate-pulse">
                 <div className="bg-white rounded-2xl rounded-bl-sm px-5 py-4 border border-gray-100 shadow-sm flex items-center space-x-1.5">
-                  <span className="text-xs text-gray-400 font-bold uppercase mr-2">Typing</span>
+                  <span className="text-xs text-gray-400 font-bold uppercase mr-2">Coach is thinking</span>
                   <div className="w-1.5 h-1.5 bg-mate-orange rounded-full animate-bounce"></div>
                   <div className="w-1.5 h-1.5 bg-mate-orange rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></div>
                   <div className="w-1.5 h-1.5 bg-mate-orange rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
@@ -118,14 +123,14 @@ const AiCoach: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Suggested Chips (Only show if not loading and messages < 5 to keep clean) */}
-          {!isLoading && messages.length < 5 && (
-             <div className="px-6 pb-2 bg-gray-50/50 flex flex-wrap gap-2 justify-center">
+          {/* Suggested Chips */}
+          {!isLoading && (
+             <div className="px-6 pb-2 bg-gray-50/50 flex flex-wrap gap-2 justify-center border-t border-transparent">
                  {SUGGESTED_QUESTIONS.map((q) => (
                      <button 
                         key={q}
                         onClick={() => handleSend(q)}
-                        className="text-xs bg-white border border-gray-200 text-gray-600 px-3 py-1.5 rounded-full hover:bg-mate-orange hover:text-white hover:border-mate-orange transition-colors shadow-sm"
+                        className="text-xs bg-white border border-gray-200 text-gray-600 px-3 py-1.5 rounded-full hover:bg-mate-orange hover:text-white hover:border-mate-orange transition-colors shadow-sm active:scale-95"
                      >
                          {q}
                      </button>
@@ -138,7 +143,7 @@ const AiCoach: React.FC = () => {
             <form onSubmit={handleSubmit} className="flex gap-3">
               <input
                 type="text"
-                className="flex-1 px-5 py-4 rounded-full border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-mate-orange/20 focus:border-mate-orange transition shadow-inner text-gray-800 placeholder-gray-400"
+                className="flex-1 px-5 py-4 rounded-full border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-mate-orange/20 focus:border-mate-orange transition shadow-inner text-gray-800 placeholder-gray-400 disabled:opacity-50 disabled:bg-gray-100"
                 placeholder="Ask about classes, prices, or vibes..."
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
